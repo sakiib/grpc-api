@@ -2,8 +2,9 @@ package service
 
 import (
 	"context"
-	"errors"
 	pb "github.com/sakiib/grpc-api/gen/go/book"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"io"
 	"sort"
 )
@@ -22,11 +23,11 @@ func NewBookService(store BookStore) *BookService {
 func (bs *BookService) CreateBook(ctx context.Context, in *pb.CreateBookRequest) (*pb.CreateBookResponse, error) {
 	book := in.GetBook()
 	if book == nil {
-		return nil, errors.New("failed to create book, request body is nil")
+		return nil, status.Error(codes.InvalidArgument, "request body is nil")
 	}
 
 	if err := bs.store.Set(book); err != nil {
-		return nil, err
+		return nil, status.Error(codes.AlreadyExists, err.Error())
 	}
 
 	return &pb.CreateBookResponse{
@@ -41,7 +42,7 @@ func (bs *BookService) GetBook(ctx context.Context, in *pb.GetBookRequest) (*pb.
 
 	book, err := bs.store.Get(id)
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
 	return &pb.GetBookResponse{
@@ -67,7 +68,7 @@ func (bs *BookService) ListBooks(req *pb.EmptyRequest, stream pb.BookService_Lis
 		if err := stream.Send(&pb.GetBookResponse{
 			Book: storedData[key],
 		}); err != nil {
-			return err
+			return status.Error(codes.Unknown, "failed to stream data to client")
 		}
 	}
 	return nil
@@ -78,7 +79,7 @@ func (bs *BookService) ListBooks(req *pb.EmptyRequest, stream pb.BookService_Lis
 func (bs *BookService) DeleteBook(ctx context.Context, in *pb.DeleteBookRequest) (*pb.DeleteBookResponse, error) {
 	books, err := bs.store.DeleteBook(in.GetId())
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
 	res := &pb.DeleteBookResponse{
@@ -92,7 +93,7 @@ func (bs *BookService) DeleteBook(ctx context.Context, in *pb.DeleteBookRequest)
 func (bs *BookService) UpdateBook(ctx context.Context, in *pb.UpdateBookRequest) (*pb.UpdateBookResponse, error) {
 	books, err := bs.store.UpdateBook(in.GetBook())
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
 	res := &pb.UpdateBookResponse{
@@ -114,17 +115,17 @@ func (bs *BookService) BooksCost(stream pb.BookService_BooksCostServer) error {
 		}
 
 		if err != nil {
-			return err
+			return status.Error(codes.Unknown, err.Error())
 		}
 
 		id := req.GetId()
 		if id == "" {
-			return errors.New("failed to get id from request streaming")
+			return status.Error(codes.InvalidArgument, "failed to get id from request streaming")
 		}
 
 		book, err := bs.store.Get(req.GetId())
 		if err != nil {
-			return err
+			return status.Error(codes.NotFound, err.Error())
 		}
 
 		cost += book.GetPrice()
@@ -140,12 +141,12 @@ func (bs *BookService) TopRatedBook(stream pb.BookService_TopRatedBookServer) er
 			return nil
 		}
 		if err != nil {
-			return err
+			return status.Error(codes.Unknown, err.Error())
 		}
 
 		book := req.GetBook()
 		if err = bs.store.Set(book); err != nil {
-			return err
+			return status.Error(codes.AlreadyExists, err.Error())
 		}
 
 		books := bs.store.GetAll()
@@ -160,7 +161,7 @@ func (bs *BookService) TopRatedBook(stream pb.BookService_TopRatedBookServer) er
 			if err = stream.Send(&pb.TopRatedResponse{
 				Book: b,
 			}); err != nil {
-				return err
+				return status.Error(codes.Unknown, err.Error())
 			}
 		}
 	}
