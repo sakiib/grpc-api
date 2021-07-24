@@ -1,0 +1,126 @@
+syntax = "proto3";
+
+package book;
+
+import "google/api/annotations.proto";
+import "book/book.proto";
+
+option go_package = "github.com/sakiib/grpc-api/proto;book";
+
+message CreateBookRequest {
+  Book book = 1;
+}
+
+message CreateBookResponse {
+  string id = 1;
+}
+
+message GetBookRequest {
+  string id = 1;
+}
+
+message GetBookResponse {
+  Book book = 1;
+}
+
+message EmptyRequest {
+
+}
+
+message GetBooksResponse {
+  repeated Book book = 1;
+}
+
+message DeleteBookRequest {
+  string id = 1;
+}
+
+message DeleteBookResponse {
+  repeated Book book = 1;
+}
+
+message UpdateBookRequest {
+  Book book = 1;
+}
+
+message UpdateBookResponse {
+  repeated Book book = 1;
+}
+
+message BooksCostRequest {
+  string id = 1;
+}
+
+message BooksCostResponse {
+  double cost = 1;
+}
+
+message TopRatedRequest {
+  Book book = 1;
+}
+
+message TopRatedResponse {
+  Book book = 1;
+}
+
+service BookService {
+  // unary call
+  rpc CreateBook (CreateBookRequest) returns (CreateBookResponse) {
+    option (google.api.http) = {
+      post: "/v1/book/create"
+      body: "book"
+    };
+  }
+
+  // unary call
+  rpc GetBook (GetBookRequest) returns (GetBookResponse) {
+    option (google.api.http) = {
+      get: "/v1/book/get/{id}"
+    };
+  }
+
+  // unary call
+  rpc DeleteBook (DeleteBookRequest) returns (DeleteBookResponse) {
+    option (google.api.http) = {
+      post: "/v1/book/delete/{id}"
+      body: "*"
+    };
+  }
+
+  // unary call
+  rpc UpdateBook (UpdateBookRequest) returns (UpdateBookResponse) {
+    option (google.api.http) = {
+      post: "/v1/book/update"
+      body: "book"
+    };
+  }
+
+  // unary call
+  rpc GetBooks (EmptyRequest) returns (GetBooksResponse) {
+    option (google.api.http) = {
+      get: "/v1/books/get"
+    };
+  }
+
+  // server streaming
+  rpc ListBooks (EmptyRequest) returns (stream GetBookResponse) {
+    option (google.api.http) = {
+      get: "/v1/books/list"
+    };
+  }
+
+  // client streaming
+  rpc BooksCost (stream BooksCostRequest) returns (BooksCostResponse) {
+    option (google.api.http) = {
+      get: "/v1/books/cost"
+    };
+  }
+
+  // client & server streaming
+  rpc TopRatedBook (stream TopRatedRequest) returns (stream TopRatedResponse) {
+    option (google.api.http) = {
+      post: "/v1/books/top"
+      body: "book"
+    };
+  }
+}

@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package book;
+
+import "google/api/annotations.proto";
+import "book/author.proto";
+
+option go_package = "github.com/sakiib/grpc-api/proto;book";
+
+enum Genre {
+  mystery = 0;
+  horror = 1;
+  comedy = 2;
+  fiction = 3;
+}
+
+message Book {
+  string id = 1;
+  string name = 2;
+  Genre genre = 4;
+  Author author = 5;
+  int32 rating = 6;
+  double price = 7;
+}

@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package book;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/sakiib/grpc-api/proto;book";
+
+message Author {
+  string name = 1;
+  int32 popularity = 2;
+}
