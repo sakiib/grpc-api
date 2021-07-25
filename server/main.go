@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/sakiib/grpc-api/certs"
 	"github.com/sakiib/grpc-api/gateway"
 	pb "github.com/sakiib/grpc-api/gen/go/book"
 	"github.com/sakiib/grpc-api/service"
@@ -22,7 +21,7 @@ func main() {
 
 	tlsEnabled := os.Getenv("tls")
 
-	grpcServer := grpc.NewServer(grpc.Creds(certs.CertOption(tlsEnabled)))
+	grpcServer := grpc.NewServer(grpc.Creds(utils.CertOption(tlsEnabled)))
 	bookServer := service.NewBookService(service.NewInMemoryStore())
 
 	pb.RegisterBookServiceServer(grpcServer, bookServer)
@@ -37,5 +36,5 @@ func main() {
 		log.Fatalf("grpc server error: %s", grpcServer.Serve(listener))
 	}()
 
-	log.Fatalf("gateway error: %s", gateway.Run("dns:///"+fmt.Sprintf("0.0.0.0:%s", *port)))
+	log.Fatalf("gateway error: %s", gateway.Run("dns:///"+fmt.Sprintf("0.0.0.0:%s", *port), tlsEnabled))
 }

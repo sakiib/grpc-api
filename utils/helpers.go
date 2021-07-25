@@ -1,22 +1,25 @@
 package utils
 
 import (
-	"crypto/tls"
-	"io/ioutil"
+	"github.com/sakiib/grpc-api/certs"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
-func GetServerCerts() *tls.Certificate {
-	crt, err := ioutil.ReadFile("certs/server-cert.pem")
-	if err != nil {
+func CertOption(tlsEnabled string) credentials.TransportCredentials {
+	if tlsEnabled != "true" {
 		return nil
 	}
-	key, err := ioutil.ReadFile("certs/server-key.pem")
-	if err != nil {
+	crt := certs.GetServerCerts()
+	if crt == nil {
 		return nil
 	}
-	cert, err := tls.X509KeyPair(crt, key)
-	if err != nil {
-		return nil
+	return credentials.NewServerTLSFromCert(crt)
+}
+
+func GetDialOption(tlsEnabled string) grpc.DialOption {
+	if tlsEnabled != "true" {
+		return grpc.WithInsecure()
 	}
-	return &cert
+	return grpc.WithTransportCredentials(credentials.NewClientTLSFromCert(certs.GetCertPool(), ""))
 }
