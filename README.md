@@ -24,6 +24,10 @@ $ export tls=true
 
 #### or Use the docker image:
 ```bash
+# pull the docker image
 $ docker pull sakibalamin/grpc-api:v0.0.1
+# run with tls disabled
 $ docker run -p 8000:8000 -it sakibalamin/grpc-api:v0.0.1
+# run with tls enabled
+$ docker run -e tls=true -p 8000:8000 -it sakibalamin/grpc-api:v0.0.1
 ```
