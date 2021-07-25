@@ -4,30 +4,38 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"io/ioutil"
+	"log"
 )
 
-func GetServerCerts() *tls.Certificate {
+var (
+	// Cert is the self-signed certificate
+	Cert tls.Certificate
+	// CertPool contains the self-signed certificate
+	CertPool *x509.CertPool
+)
+
+func init() {
 	crt, err := ioutil.ReadFile("certs/server-cert.pem")
 	if err != nil {
-		return nil
+		log.Fatalf("failed to read certs/server-cert.pem, %s", err.Error())
 	}
+
 	key, err := ioutil.ReadFile("certs/server-key.pem")
 	if err != nil {
-		return nil
+		log.Fatalf("failed to read certs/server-key.pem, %s", err.Error())
 	}
-	cert, err := tls.X509KeyPair(crt, key)
+
+	Cert, err = tls.X509KeyPair(crt, key)
 	if err != nil {
-		return nil
+		log.Fatalf("failed to create certs key pair, %s", err.Error())
+
 	}
-	return &cert
-}
 
-func GetCertPool() *x509.CertPool {
-	Cert := GetServerCerts()
-	Cert.Leaf, _ = x509.ParseCertificate(Cert.Certificate[0])
+	Cert.Leaf, err = x509.ParseCertificate(Cert.Certificate[0])
+	if err != nil {
+		log.Fatalf("failed to parse certificate, %s", err.Error())
+	}
 
-	CertPool := x509.NewCertPool()
+	CertPool = x509.NewCertPool()
 	CertPool.AddCert(Cert.Leaf)
-
-	return CertPool
 }

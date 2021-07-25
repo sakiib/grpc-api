@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/sakiib/grpc-api/certs"
 	"github.com/sakiib/grpc-api/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
@@ -54,7 +53,7 @@ func Run(dialAddr, tlsEnabled string) error {
 			}
 		}),
 		TLSConfig: &tls.Config{
-			Certificates: []tls.Certificate{*certs.GetServerCerts()},
+			Certificates: []tls.Certificate{*utils.GetServerCerts()},
 		},
 	}
 
