@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/sakiib/grpc-api/certs"
 	"github.com/sakiib/grpc-api/gateway"
 	pb "github.com/sakiib/grpc-api/gen/go/book"
 	"github.com/sakiib/grpc-api/service"
@@ -10,6 +11,7 @@ import (
 	"google.golang.org/grpc"
 	"log"
 	"net"
+	"os"
 )
 
 func main() {
@@ -18,7 +20,9 @@ func main() {
 
 	log.Printf("starting the server on port: %s", *port)
 
-	grpcServer := grpc.NewServer()
+	tlsEnabled := os.Getenv("tls")
+
+	grpcServer := grpc.NewServer(grpc.Creds(certs.CertOption(tlsEnabled)))
 	bookServer := service.NewBookService(service.NewInMemoryStore())
 
 	pb.RegisterBookServiceServer(grpcServer, bookServer)
