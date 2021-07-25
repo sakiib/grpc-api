@@ -13,6 +13,8 @@ func CertOption(tlsEnabled string) credentials.TransportCredentials {
 		return nil
 	}
 
+	certs.PrepareCerts()
+
 	crt := GetServerCerts()
 	if crt == nil {
 		return nil

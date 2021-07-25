@@ -14,7 +14,7 @@ var (
 	CertPool *x509.CertPool
 )
 
-func init() {
+func PrepareCerts() {
 	crt, err := ioutil.ReadFile("certs/server-cert.pem")
 	if err != nil {
 		log.Fatalf("failed to read certs/server-cert.pem, %s", err.Error())
