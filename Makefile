@@ -20,6 +20,11 @@ install:
 		github.com/bufbuild/buf/cmd/buf
 
 .PHONY:
+gen-certs:
+	@ echo generating tls certs
+	@ cd certs; chmod +x gen.sh; ./gen.sh; cd ..
+
+.PHONY:
 run:
 	@ echo running gRPC server
 	@ go run server/main.go -port 8080

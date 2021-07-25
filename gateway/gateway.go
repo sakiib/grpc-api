@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/sakiib/grpc-api/utils"
@@ -16,7 +17,7 @@ import (
 )
 
 // Run establishes a connection with gRPC server that we're already running
-func Run(dialAddr string) error {
+func Run(dialAddr, tlsEnabled string) error {
 	log := grpclog.NewLoggerV2(os.Stdout, ioutil.Discard, ioutil.Discard)
 	grpclog.SetLoggerV2(log)
 
@@ -24,7 +25,7 @@ func Run(dialAddr string) error {
 	connection, err := grpc.DialContext(
 		context.Background(),
 		dialAddr,
-		grpc.WithInsecure(),
+		utils.GetDialOption(tlsEnabled),
 		grpc.WithBlock(),
 	)
 	if err != nil {
@@ -51,7 +52,13 @@ func Run(dialAddr string) error {
 				return
 			}
 		}),
+		TLSConfig: &tls.Config{
+			Certificates: []tls.Certificate{*utils.GetServerCerts()},
+		},
 	}
 
-	return fmt.Errorf("serving gRPC-Gateway server: %v", gwServer.ListenAndServe())
+	if tlsEnabled != "true" {
+		return fmt.Errorf("serving insecured gRPC-Gateway server: %v", gwServer.ListenAndServe())
+	}
+	return fmt.Errorf("serving secured gRPC-Gateway server: %v", gwServer.ListenAndServeTLS("", ""))
 }
