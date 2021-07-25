@@ -59,7 +59,7 @@ func Run(dialAddr, tlsEnabled string) error {
 	}
 
 	if tlsEnabled != "true" {
-		return fmt.Errorf("serving gRPC-Gateway server: %v", gwServer.ListenAndServe())
+		return fmt.Errorf("serving insecured gRPC-Gateway server: %v", gwServer.ListenAndServe())
 	}
-	return fmt.Errorf("serving gRPC-Gateway server: %v", gwServer.ListenAndServeTLS("", ""))
+	return fmt.Errorf("serving secured gRPC-Gateway server: %v", gwServer.ListenAndServeTLS("", ""))
 }
